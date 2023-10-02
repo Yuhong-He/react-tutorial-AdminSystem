@@ -1,81 +1,69 @@
-import React, { Component } from 'react';
-import { Menu } from 'antd';
+import React, { useState, useEffect } from "react";
+import { Menu } from "antd";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function getItem(label, key, icon, children, type) {
-    return {
-        key,
-        icon,
-        children,
-        label,
-        type,
-    };
+  return {
+    key,
+    icon,
+    children,
+    label,
+    type,
+  };
 }
 
-let items = [];
+function NavLeft() {
+  const [items, setItems] = useState([]);
+  const [current, setCurrent] = useState("1");
+  const navigate = useNavigate();
 
-class NavLeft extends Component {
-    state = {
-        items: []
-    };
+  useEffect(() => {
+    loadMenu();
+  }, []);
 
-    componentDidMount() {
-        this.loadMenu();
-    }
+  const loadMenu = () => {
+    axios.get("/menus").then((res) => {
+      const items = createMenu(res.data);
+      setItems(items);
+    });
+  };
 
-    loadMenu() {
-        axios.get('/menus').then(res => {
-            const items = this.createMenu(res.data);
-            this.setState({
-                items: items
-            })
-        })
-    }
+  const createMenu = (data) => {
+    const menuList = [];
+    data.map((item) => {
+      let menu;
+      if (item.children.length > 0) {
+        const children = [];
+        item.children.forEach((ele) => {
+          const childMenu = getItem(ele.title, ele.id, "", "", "");
+          children.push(childMenu);
+        });
+        menu = getItem(item.title, item.id, "", children, "");
+      } else {
+        menu = getItem(item.title, item.id, "", "", "");
+      }
+      menuList.push(menu);
+    });
+    return menuList;
+  };
 
-    createMenu(data) {
-        const menuList = [];
-        data.map((item) => {
-            let menu;
-            if(item.children.length > 0) {
-                const children = [];
-                item.children.forEach(ele => {
-                    const childMenu = getItem(ele.title, ele.id, "", "", "")
-                    children.push(childMenu);
-                })
-                menu = getItem(item.title, item.id, "", children, "")
-            } else {
-                menu = getItem(item.title, item.id, "", "", "")
-            }
-            menuList.push(menu)
-        })
-        return menuList
-    }
+  const onClick = (e) => {
+    console.log("click ", e);
+    setCurrent(e.key);
+    navigate(`/admin/${e.key}`);
+  };
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            current: '1'
-        };
-    }
-
-    onClick = (e) => {
-        console.log('click ', e);
-        this.setState({ current: e.key });
-    }
-
-    render() {
-        return (
-            <Menu
-                theme="dark"
-                onClick={this.onClick}
-                defaultOpenKeys={['sub1']}
-                selectedKeys={[this.state.current]}
-                mode="inline"
-                items={this.state.items}
-            />
-        );
-    }
+  return (
+    <Menu
+      theme="dark"
+      onClick={onClick}
+      defaultOpenKeys={["sub1"]}
+      selectedKeys={[current]}
+      mode="inline"
+      items={items}
+    ></Menu>
+  );
 }
 
 export default NavLeft;

@@ -14,8 +14,8 @@ class Router extends Component {
                     <Route path="/login" element={<Login />} />
                     <Route path="/admin" element={<Admin />}>
                         <Route index element={<Home />} />
-                        <Route path="/admin/goods-list" element={<GoodsList />} />
-                        <Route path="/admin/goods-info" element={<GoodInfo />} />
+                        <Route path="/admin/3" element={<GoodsList />} />
+                        <Route path="/admin/4" element={<GoodInfo />} />
                     </Route>
                 </Routes>
             </BrowserRouter>
@@ -24,3 +24,4 @@ class Router extends Component {
 }
 
 export default Router;
+
